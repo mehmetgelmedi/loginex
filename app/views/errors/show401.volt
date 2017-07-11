@@ -1,0 +1,1 @@
+401 erisim yetkiniz yok!

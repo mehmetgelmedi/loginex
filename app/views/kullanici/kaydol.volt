@@ -1,11 +1,7 @@
-<?php 
-if ($this->session->has("kAdi")) {
-		$this->response->redirect("");
-	} ?>
 <div class="panel-heading">
 	<h3>Kayit Paneli</h3>
 </div>
-{{ form('kullanici/_Kaydol','method','post') }}
+{{ form('Kullanici/_Kaydol','method','post') }}
 <div class="form-group">
 <div class="row">
 	<label class="col-sm-2 control-label" for="kAdi">Kullanici Adi</label>

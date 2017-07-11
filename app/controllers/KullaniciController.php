@@ -1,7 +1,7 @@
-<?php
+    <?php
 
-class KullaniciController extends ControllerBase
-{
+    class KullaniciController extends ControllerBase
+    {
 
     public function indexAction(){
 
@@ -10,10 +10,22 @@ class KullaniciController extends ControllerBase
        
     }
     public function GirisAction(){
+    }
+    private function GirisSession($kullanici){
+        $this->session->set(
+                'auth',
+                [
+                    'id'=>$kullanici->id,
+                    'kAdi'=>$kullanici->kAdi,
+                ]
+            );
+    }
+    public function _GirisAction(){
+
         if (!$this->request->isPost()) {
             $this->dispatcher->forward([
-                'controller' => 'Kullanici',
-                'action' => 'index'
+                'controller' => 'kullanici',
+                'action' => 'giris'
             ]);
             return;
         }
@@ -24,21 +36,17 @@ class KullaniciController extends ControllerBase
             if($kullanici){
                 if($this->security->checkHash($parola,$kullanici->pass)){
                     $this->flash->success("giriş yapildi");
-                    $this->session->set("kAdi",$this->request->getPost("kAdi"));   
+                    #$this->session->set("kAdi",$this->request->getPost("kAdi"));
+                    $this->GirisSession($kullanici);
                     $this->dispatcher->forward([
-                    'controller' => "Kullanici",
+                    'controller' => 'admin',
                     'action' => 'index'
                     ]);
                 }
-                else {
-                    $this->flash->error("hatali");
-                    $this->dispatcher->forward([
-                    'controller' => "Kullanici",
-                    'action' => 'index'
-                    ]);
-                }  
             }
             else {
+				##hatali giriş
+				$this->flash->error("giriş başarisiz");
                 $this->security->hash(rand());
             }
         }
@@ -47,16 +55,20 @@ class KullaniciController extends ControllerBase
         }
     }
     
-    public function CikisAction(){
-        $this->session->destroy();
+    public function _CikisAction(){
+        $this->session->remove('auth');
         $this->flash->success("Çikiş yapildi");
-        $this->response->redirect("");
+        $this->dispatcher->forward([
+            'controller' => "index",
+            'action' => 'index'
+            ]);
+        #$this->response->redirect("");
     }
     public function _KaydolAction(){
         if (!$this->request->isPost()) {
         $this->dispatcher->forward([
             'controller' => 'Kullanici',
-            'action' => 'Kaydol'
+            'action' => 'kaydol'
         ]);
         return;
         }
@@ -66,12 +78,12 @@ class KullaniciController extends ControllerBase
         $kullanici =new Kullanici();
         $kullanici->kAdi=$kAdi;
         $kullanici->pass=$this->security->hash($parola);
-
+        $kullanici->tarih=new Phalcon\Db\RawValue('now()');
         if($kullanici->save()){
             $this->flash->success("kayit olundu.");
-              $this->dispatcher->forward([
+            $this->dispatcher->forward([
             'controller' => "Kullanici",
-            'action' => 'index'
+            'action' => 'giris'
             ]);
         }
     }
